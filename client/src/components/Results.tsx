@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Exam } from "../types";
 import api_client from "../api_client";
 import toast from "react-hot-toast";
-import ExamCard from "./ExamCard";
 import Header from "./Header";
 import { Paper, Typography, Card, CardContent } from "@mui/material";
 import {
@@ -22,67 +19,50 @@ import {
 
 interface ExamResult {
   id: number;
-  title: string;
-  subject: string;
-  score: number;
-  totalMarks: number;
-  percentage: number;
-  grade: string;
-  date: string;
+  exam_id: number;
+  student_id: number;
+  student_name: string;
+  submission_time: string;
+  total_marks: number;
+  is_submitted: boolean;
+  exam: {
+    title: string;
+    description: string;
+    total_marks: number;
+  };
 }
 
 interface PerformanceMetrics {
+  totalExams: number;
   averageScore: number;
   highestScore: number;
   lowestScore: number;
   passRate: number;
-  totalExams: number;
-  subjectWisePerformance: {
-    subject: string;
-    averageScore: number;
-  }[];
-  gradeDistribution: {
-    grade: string;
-    count: number;
-  }[];
+  subjectWisePerformance: { subject: string; averageScore: number }[];
+  gradeDistribution: { grade: string; count: number }[];
 }
 
 const COLORS = ["#E5E7EB", "#D1D5DB", "#9CA3AF", "#6B7280", "#4B5563"];
 
-const UserDashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const [exams, setExams] = useState<Exam[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const Results: React.FC = () => {
+  const [results, setResults] = useState<ExamResult[]>([]);
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchExams = async () => {
+    const fetchResults = async () => {
       try {
-        const response = await api_client.get<Exam[]>("/exams");
-        const now = new Date();
-        const activeExams = response.data.filter((exam) => {
-          const endTime = new Date(exam.end_time);
-          return exam.is_active && now < endTime;
-        });
-        setExams(activeExams);
+        const response = await api_client.get<ExamResult[]>("/exams/results");
+        setResults(response.data);
+        calculateMetrics(response.data);
       } catch (error) {
-        console.error("Error fetching exams:", error);
-        toast.error("Failed to load exams");
+        console.error("Error fetching results:", error);
+        toast.error("Failed to load results");
       } finally {
         setIsLoading(false);
       }
     };
 
-    const fetchResults = async () => {
-      try {
-        const response = await api_client.get<ExamResult[]>("/exams/results");
-        calculateMetrics(response.data);
-      } catch (error) {
-        console.error("Error fetching results:", error);
-      }
-    };
-
-    fetchExams();
     fetchResults();
   }, []);
 
@@ -91,26 +71,25 @@ const UserDashboard: React.FC = () => {
 
     const totalExams = examResults.length;
     const totalScore = examResults.reduce(
-      (sum, result) => sum + result.percentage,
+      (sum, result) => sum + result.total_marks,
       0
     );
-    const averageScore = totalScore / totalExams;
-    const highestScore = Math.max(
-      ...examResults.map((result) => result.percentage)
-    );
-    const lowestScore = Math.min(
-      ...examResults.map((result) => result.percentage)
-    );
+    const averageScore = (totalScore / totalExams) * 100;
+    const highestScore =
+      Math.max(...examResults.map((result) => result.total_marks)) * 100;
+    const lowestScore =
+      Math.min(...examResults.map((result) => result.total_marks)) * 100;
     const passRate =
-      (examResults.filter((result) => result.percentage >= 40).length /
+      (examResults.filter((result) => result.total_marks >= 40).length /
         totalExams) *
       100;
 
     const subjectMap = new Map<string, { total: number; count: number }>();
     examResults.forEach((result) => {
-      const existing = subjectMap.get(result.subject) || { total: 0, count: 0 };
-      subjectMap.set(result.subject, {
-        total: existing.total + result.percentage,
+      const subject = result.exam.title.split(" ")[0]; // Assuming first word is subject
+      const existing = subjectMap.get(subject) || { total: 0, count: 0 };
+      subjectMap.set(subject, {
+        total: existing.total + result.total_marks,
         count: existing.count + 1,
       });
     });
@@ -118,13 +97,21 @@ const UserDashboard: React.FC = () => {
     const subjectWisePerformance = Array.from(subjectMap.entries()).map(
       ([subject, data]) => ({
         subject,
-        averageScore: data.total / data.count,
+        averageScore: (data.total / data.count) * 100,
       })
     );
 
     const gradeMap = new Map<string, number>();
     examResults.forEach((result) => {
-      gradeMap.set(result.grade, (gradeMap.get(result.grade) || 0) + 1);
+      const percentage = (result.total_marks / result.exam.total_marks) * 100;
+      let grade = "F";
+      if (percentage >= 90) grade = "A+";
+      else if (percentage >= 80) grade = "A";
+      else if (percentage >= 70) grade = "B+";
+      else if (percentage >= 60) grade = "B";
+      else if (percentage >= 50) grade = "C";
+      else if (percentage >= 40) grade = "D";
+      gradeMap.set(grade, (gradeMap.get(grade) || 0) + 1);
     });
 
     const gradeDistribution = Array.from(gradeMap.entries()).map(
@@ -135,24 +122,25 @@ const UserDashboard: React.FC = () => {
     );
 
     setMetrics({
+      totalExams,
       averageScore,
       highestScore,
       lowestScore,
       passRate,
-      totalExams,
       subjectWisePerformance,
       gradeDistribution,
     });
   };
 
-  const handleStartExam = (examId: string) => {
-    navigate(`/exam/${examId}`);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-600"></div>
       </div>
     );
   }
@@ -162,23 +150,26 @@ const UserDashboard: React.FC = () => {
       <Header />
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Main Content */}
-          <div className="">
+          <div className="ml-64">
             <div className="flex justify-between items-center mb-8">
               <h1 className="text-2xl font-medium text-gray-900">
-                Student Dashboard
+                Exam Results
               </h1>
             </div>
 
-            {/* Analytics Section */}
-            {metrics && (
-              <div className="mb-12 bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-medium text-gray-900 mb-6">
-                  Your Performance
+            {!metrics ? (
+              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                <h2 className="text-lg font-medium text-gray-600">
+                  No results available
                 </h2>
-
+                <p className="mt-2 text-gray-500">
+                  You haven't taken any exams yet
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-8">
                 {/* Performance Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card className="bg-white border border-gray-200 hover:border-gray-300 transition-colors duration-200">
                     <CardContent>
                       <Typography
@@ -237,47 +228,32 @@ const UserDashboard: React.FC = () => {
                   </Card>
                 </div>
 
-                {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Paper
-                    sx={{ p: 2 }}
-                    className="bg-white border border-gray-200"
-                  >
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      className="text-gray-700 text-sm font-medium"
-                    >
-                      Subject-wise Performance
-                    </Typography>
-                    <ResponsiveContainer width="100%" height={300}>
+                {/* Subject-wise Performance Chart */}
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <Typography variant="h6" className="mb-4">
+                    Subject-wise Performance
+                  </Typography>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={metrics.subjectWisePerformance}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                        <XAxis dataKey="subject" stroke="#6B7280" />
-                        <YAxis stroke="#6B7280" />
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="subject" />
+                        <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar
-                          dataKey="averageScore"
-                          fill="#9CA3AF"
-                          name="Average Score"
-                        />
+                        <Bar dataKey="averageScore" fill="#4F46E5" />
                       </BarChart>
                     </ResponsiveContainer>
-                  </Paper>
+                  </div>
+                </div>
 
-                  <Paper
-                    sx={{ p: 2 }}
-                    className="bg-white border border-gray-200"
-                  >
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      className="text-gray-700 text-sm font-medium"
-                    >
-                      Grade Distribution
-                    </Typography>
-                    <ResponsiveContainer width="100%" height={300}>
+                {/* Grade Distribution Chart */}
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <Typography variant="h6" className="mb-4">
+                    Grade Distribution
+                  </Typography>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={metrics.gradeDistribution}
@@ -299,38 +275,61 @@ const UserDashboard: React.FC = () => {
                         <Legend />
                       </PieChart>
                     </ResponsiveContainer>
-                  </Paper>
+                  </div>
+                </div>
+
+                {/* Detailed Results */}
+                <div className="space-y-4">
+                  {results.map((result) => (
+                    <Paper
+                      key={result.id}
+                      className="bg-white border border-gray-200 p-6 hover:border-gray-300 transition-colors duration-200"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <Typography variant="h6" className="text-gray-900">
+                            {result.exam.title}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            className="text-gray-500 mt-1"
+                          >
+                            {result.exam.description}
+                          </Typography>
+                        </div>
+                        <div className="text-right">
+                          <Typography
+                            variant="h6"
+                            className={`${
+                              result.total_marks >= 40
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {(
+                              (result.total_marks / result.exam.total_marks) *
+                              100
+                            ).toFixed(1)}
+                            %
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            className="text-gray-500 mt-1"
+                          >
+                            Score: {result.total_marks} /{" "}
+                            {result.exam.total_marks}
+                          </Typography>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
+                        <div>Submitted by: {result.student_name}</div>
+                        <div>Date: {formatDate(result.submission_time)}</div>
+                      </div>
+                    </Paper>
+                  ))}
                 </div>
               </div>
             )}
-
-            {/* Available Exams Section */}
-            <div>
-              <h2 className="text-xl font-medium text-gray-900 mb-6">
-                Available Exams
-              </h2>
-              {exams.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                  <h2 className="text-lg font-medium text-gray-600">
-                    No exams available at the moment
-                  </h2>
-                  <p className="mt-2 text-gray-500">
-                    Check back later for new exams
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {exams.map((exam) => (
-                    <ExamCard
-                      key={exam.id}
-                      exam={exam}
-                      onStartExam={() => handleStartExam(exam.id.toString())}
-                      isTeacher={false}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -338,4 +337,4 @@ const UserDashboard: React.FC = () => {
   );
 };
 
-export default UserDashboard;
+export default Results;

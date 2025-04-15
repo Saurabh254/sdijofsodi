@@ -29,6 +29,12 @@ const ExamCard = ({ exam, onStartExam, isTeacher }: ExamCardProps) => {
     return now > endTime;
   };
 
+  const isExamStarted = () => {
+    const now = new Date();
+    const startTime = new Date(exam.start_time);
+    return now >= startTime;
+  };
+
   return (
     <div className="min-w-64 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border-1 border-slate-100">
       <div className="bg-gray-800 text-white text-center py-3 px-4 font-semibold text-md tracking-wide">
@@ -60,18 +66,28 @@ const ExamCard = ({ exam, onStartExam, isTeacher }: ExamCardProps) => {
           <span className="font-medium">Status:</span>
           {isExamEnded() ? (
             <span className="text-red-600 font-semibold">Exam Ended</span>
-          ) : (
+          ) : isTeacher ? (
             <button
-              onClick={() => {
-                if (isTeacher) {
-                  navigate(`/teacher/exam/${exam.id}`);
-                } else {
-                  onStartExam();
-                }
-              }}
+              onClick={() => navigate(`/teacher/exam/${exam.id}`)}
               className="btn text-white font-semibold py-1 px-3 rounded-xl bg-indigo-600 cursor-pointer hover:bg-indigo-700 transition duration-200"
             >
-              {isTeacher ? "View" : "Start"}
+              View
+            </button>
+          ) : (
+            <button
+              onClick={onStartExam}
+              disabled={!isExamStarted() || exam.status != "completed"}
+              className={`btn text-white font-semibold py-1 px-3 rounded-xl ${
+                isExamStarted()
+                  ? "bg-indigo-600 hover:bg-indigo-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              } transition duration-200`}
+            >
+              {isExamStarted()
+                ? exam.status == "completed"
+                  ? "Start"
+                  : "attempted"
+                : "Not Started"}
             </button>
           )}
         </div>

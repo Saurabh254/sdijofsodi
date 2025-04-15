@@ -3,7 +3,7 @@ import api_client from "../api_client";
 import { Exam } from "../types";
 import { useNavigate } from "react-router-dom";
 
-const Card = ({ exam }: { exam: Exam }) => {
+const Card = ({ exam, state }: { exam: Exam; state: string }) => {
   const navigate = useNavigate();
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -46,7 +46,13 @@ const Card = ({ exam }: { exam: Exam }) => {
         </div>
         <div className="flex justify-between text-sm">
           <span className="font-medium">Status:</span>
-          <span className="text-green-600 font-semibold">Attempted</span>
+          <span
+            className={`${
+              state == "upcoming" ? "text-red-600" : "text-green-600"
+            } font-semibold`}
+          >
+            {state}
+          </span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="font-medium">Questions:</span>
@@ -73,7 +79,7 @@ export default function UpcomingExams() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await api_client.get<Exam[]>("/exams");
+        const response = await api_client.get<Exam[]>("/exams?upcoming=true");
         setExams(response.data);
         console.log(response.data);
       } catch (error) {
@@ -86,10 +92,10 @@ export default function UpcomingExams() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Previous Exams</h1>
+      <h1 className="text-2xl font-bold mb-6">Upcoming Exams</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {exams.map((exam) => (
-          <Card key={exam.id} exam={exam} />
+          <Card key={exam.id} exam={exam} state="upcoming" />
         ))}
       </div>
     </div>

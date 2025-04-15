@@ -23,7 +23,7 @@ const ThankYouPage: React.FC = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => navigate("/student/dashboard")}
+            onClick={() => navigate("/dashboard")}
             sx={{ mt: 2 }}
           >
             Return to Dashboard

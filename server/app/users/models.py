@@ -14,6 +14,8 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
     is_faculty = Column(Boolean, default=False)
+    branch = Column(String, nullable=True)
+    semester = Column(String, nullable=True, default="cse")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

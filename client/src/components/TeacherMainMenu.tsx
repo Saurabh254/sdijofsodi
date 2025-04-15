@@ -13,7 +13,7 @@ export default function TeacherMainMenu() {
         <ul className="menu rounded-box items-center justify-evenly w-full [&>*]:px-8 flex flex-row gap-2 ">
           <li>
             <Link
-              to="/create-exam"
+              to="/teacher/create-exam"
               className="hover:bg-[#01013a] px-4 py-2 rounded-lg hover:text-white flex items-center bg-white gap-2 duration-200"
             >
               <RiAB /> Create new exam

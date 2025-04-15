@@ -9,10 +9,14 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    branch: str
+    semester: int
 
 
 class User(UserBase):
     id: int
+    branch: str
+    semester: int
     is_active: bool
 
     class Config:

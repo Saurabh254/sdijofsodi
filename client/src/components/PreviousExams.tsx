@@ -33,7 +33,7 @@ const PreviousExams = () => {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await api_client.get<Exam[]>("/exams");
+        const response = await api_client.get<Exam[]>("/exams?previous=true");
         console.log("Raw API response:", response.data);
 
         setExams(response.data);

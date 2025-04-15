@@ -13,6 +13,7 @@ export interface Exam {
     description: string;
     start_time: string;
     end_time: string;
+    status: string;
     duration_minutes: number;
     faculty_id: number;
     is_active: boolean;

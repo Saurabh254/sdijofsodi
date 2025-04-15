@@ -86,7 +86,7 @@ const Exam: React.FC = () => {
       const response = await apiClient.post(`/exams/student/${examId}/submit`, {
         answers,
       });
-      navigate("/thank-you", { state: response.data });
+      navigate("/exam/thank-you", { state: response.data });
     } catch {
       setError("Failed to submit exam");
     } finally {
@@ -299,7 +299,6 @@ const Exam: React.FC = () => {
                 </div>
                 <button
                   onClick={handleSubmit}
-                  disabled={submitting}
                   className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
                 >
                   {submitting ? (

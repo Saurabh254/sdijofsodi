@@ -49,7 +49,7 @@ const MyExams = () => {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 ml-64">
+      <main className="flex-1 ">
         <div className="p-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">My Exams</h1>
 
@@ -117,8 +117,11 @@ const MyExams = () => {
                       </div>
                     </div>
                     <div className="mt-4">
-                      <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
-                        Start Exam
+                      <button
+                        disabled={true}
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                      >
+                        Not Started
                       </button>
                     </div>
                   </div>

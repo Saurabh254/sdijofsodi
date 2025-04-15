@@ -80,7 +80,7 @@ class AnswerSubmissionBase(BaseModel):
 
 class ExamSubmissionCreate(BaseModel):
     exam_id: int
-    answers: List[AnswerSubmissionBase]
+    answers: AnswerSubmissionBase
 
 
 class AnswerSubmission(AnswerSubmissionBase):
@@ -92,14 +92,76 @@ class AnswerSubmission(AnswerSubmissionBase):
         from_attributes = True
 
 
-class ExamSubmission(BaseModel):
-    id: int
+class ExamSubmissionBase(BaseModel):
     exam_id: int
     student_id: int
     submission_time: datetime
     total_marks: int
     is_submitted: bool
-    answers: List[AnswerSubmission]
+
+
+class ExamSubmission(ExamSubmissionBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class ExamWithSubmissions(BaseModel):
+    id: int
+    title: str
+    total_marks: int
+    submissions: List[ExamSubmission]
+
+    class Config:
+        from_attributes = True
+
+
+class AnswerSubmissionDetail(BaseModel):
+    question_id: int
+    question_text: str
+    correct_answer: str
+    student_answer: str
+    marks_obtained: int
+    total_marks: int
+
+    class Config:
+        from_attributes = True
+
+
+class SubmissionDetails(BaseModel):
+    id: int
+    exam_id: int
+    exam_title: str
+    student_name: str
+    submission_time: datetime
+    total_marks: int
+    marks_obtained: int
+    answers: List[AnswerSubmissionDetail]
+
+    class Config:
+        from_attributes = True
+
+
+class QuestionAnalysis(BaseModel):
+    question_id: int
+    question_text: str
+    correct_answers: int
+    total_attempts: int
+    correct_percentage: float
+
+    class Config:
+        from_attributes = True
+
+
+class ExamAnalytics(BaseModel):
+    exam_id: int
+    total_submissions: int
+    average_marks: float
+    highest_marks: int
+    lowest_marks: int
+    pass_percentage: float
+    question_wise_analysis: List[QuestionAnalysis]
 
     class Config:
         from_attributes = True

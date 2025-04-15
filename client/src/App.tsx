@@ -7,6 +7,9 @@ import {
   Navigate,
 } from "react-router-dom";
 import Analytics from "./components/Analytics";
+import ExamResults from "./components/ExamResults";
+import SubmissionDetails from "./components/SubmissionDetails";
+import { Toaster } from "react-hot-toast";
 
 // Lazy load components
 const Login = lazy(() => import("./pages/Login"));
@@ -18,11 +21,16 @@ const UserDashboard = lazy(() => import("./components/UserDashboard"));
 const TakeExam = lazy(() => import("./components/TakeExam"));
 const StudentsPage = lazy(() => import("./pages/StudentsPage"));
 const ThankYouPage = lazy(() => import("./pages/ThankYouPage"));
+const MyExams = lazy(() => import("./components/MyExams"));
+const Results = lazy(() => import("./components/Results"));
+const UpcomingExams = lazy(() => import("./components/UpcomingExams"));
+const AddStudentForm = lazy(() => import("./components/AddStudentForm"));
+const UserDashboardLayout = lazy(() => import("./layout/UserDashboardLayout"));
 
 // Loading component
 const Loading = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-600"></div>
   </div>
 );
 
@@ -32,22 +40,38 @@ const App: React.FC = () => {
       <Router>
         <Suspense fallback={<Loading />}>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
+
+            {/* Teacher routes */}
             <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-            <Route path="/create-exam" element={<CreateExam />} />
-            <Route path="/teacher/exam/:examId" element={<ViewExam />} />
+            <Route path="/teacher/create-exam" element={<CreateExam />} />
+            <Route path="/teacher/view-exam/:id" element={<ViewExam />} />
+            <Route path="/teacher/upcoming-exams" element={<UpcomingExams />} />
             <Route path="/teacher/previous-exams" element={<PreviousExams />} />
-            <Route path="/dashboard" element={<UserDashboard />} />
-            <Route path="/student/dashboard" element={<UserDashboard />} />
-            <Route path="/student/exam/:examId" element={<TakeExam />} />
+            <Route path="/teacher/results" element={<ExamResults />} />
             <Route path="/teacher/students/list" element={<StudentsPage />} />
+            <Route path="/teacher/students/add" element={<AddStudentForm />} />
+            <Route
+              path="/teacher/exam/:examId/submission/:submissionId"
+              element={<SubmissionDetails />}
+            />
+
+            {/* User/Student routes */}
+            <Route path="/dashboard" element={<UserDashboardLayout />}>
+              <Route index element={<UserDashboard />} />
+              <Route path="exams" element={<MyExams />} />
+              <Route path="results" element={<Results />} />
+              <Route path="analytics" element={<Analytics />} />
+            </Route>
+
+            {/* Standalone routes */}
+            <Route path="/exam/:examId" element={<TakeExam />} />
             <Route path="/exam/thank-you" element={<ThankYouPage />} />
-            <Route path="/analytics" element={<Analytics />} />
-            {/* <Route path="/dashboard" element={<StudentDashboard />} /> */}
           </Routes>
         </Suspense>
       </Router>
+      <Toaster position="top-right" />
     </div>
   );
 };

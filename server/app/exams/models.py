@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+from turtle import update
 from sqlalchemy import (
     ARRAY,
     Column,
@@ -10,6 +12,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from app.database.db import Base
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class Exam(Base):
@@ -18,12 +21,17 @@ class Exam(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(Text)
-    start_time = Column(DateTime)
-    end_time = Column(DateTime)
+    start_time: Mapped[DateTime] = mapped_column(DateTime)
+    end_time: Mapped[DateTime] = mapped_column(DateTime)
     duration_minutes = Column(Integer)
     faculty_id = Column(Integer, ForeignKey("users.id"))
+    status = Column(String, default="pending")
     is_active = Column(Boolean, default=True)
-
+    total_marks = Column(Integer, default=0)
+    created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now(UTC))
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC)
+    )
     # Relationships
     faculty = relationship("User", back_populates="created_exams")
     questions = relationship("Question", back_populates="exam")

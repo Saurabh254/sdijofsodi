@@ -76,7 +76,7 @@ const ExamCard = ({ exam, onStartExam, isTeacher }: ExamCardProps) => {
           ) : (
             <button
               onClick={onStartExam}
-              disabled={!isExamStarted() || exam.status != "completed"}
+              disabled={exam.status === "completed"}
               className={`btn text-white font-semibold py-1 px-3 rounded-xl ${
                 isExamStarted()
                   ? "bg-indigo-600 hover:bg-indigo-700"
@@ -84,9 +84,11 @@ const ExamCard = ({ exam, onStartExam, isTeacher }: ExamCardProps) => {
               } transition duration-200`}
             >
               {isExamStarted()
-                ? exam.status == "completed"
+                ? exam.status === "pending"
                   ? "Start"
-                  : "attempted"
+                  : exam.status === "completed"
+                  ? "Attempted"
+                  : "Not Started"
                 : "Not Started"}
             </button>
           )}

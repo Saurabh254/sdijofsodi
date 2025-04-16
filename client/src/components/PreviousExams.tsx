@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api_client from "../api_client";
 import { toast } from "react-hot-toast";
 import Header from "./Header";
@@ -85,7 +85,9 @@ const PreviousExams = () => {
           ) : (
             <div className="space-y-6 columns-2 lg:columns-3 gap-6">
               {exams.map((exam) => (
-                <ExamCard key={exam.id} exam={exam} isTeacher={true} />
+                <Link to={`/teacher/exam/${exam.id}/submissions`} key={exam.id}>
+                  <ExamCard exam={exam} isTeacher={true} />
+                </Link>
               ))}
             </div>
           )}

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime, UTC
@@ -123,9 +124,21 @@ def get_exams(
 ):
     exams = db.query(models.Exam)
     if previous:
-        exams = exams.filter(models.Exam.end_time < datetime.now(UTC))
+        exams = exams.filter(
+            or_(
+                models.Exam.end_time < datetime.now(UTC),
+                models.Exam.start_time < datetime.now(UTC),
+            ),
+            models.Exam.status == "completed",
+        )
     if upcoming:
-        exams = exams.filter(models.Exam.start_time > datetime.now(UTC))
+        exams = exams.filter(
+            or_(
+                models.Exam.start_time > datetime.now(UTC),
+                models.Exam.end_time > datetime.now(UTC),
+            ),
+            models.Exam.status == "upcoming",
+        )
     if attempted:
         exams = exams.filter(
             models.ExamSubmission.student_id == current_user.id,

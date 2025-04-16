@@ -19,6 +19,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import WebcamWarning from "./WebCamWarning";
 
 interface ExamResult {
   id: number;
@@ -306,6 +307,7 @@ const UserDashboard: React.FC = () => {
 
             {/* Available Exams Section */}
             <div>
+              <WebcamWarning />
               <h2 className="text-xl font-medium text-gray-900 mb-6">
                 Available Exams
               </h2>

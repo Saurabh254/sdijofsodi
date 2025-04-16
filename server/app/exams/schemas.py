@@ -67,6 +67,7 @@ class Exam(ExamBase):
     id: int
     faculty_id: int
     is_active: bool
+    status: str
     questions: List[QuestionResponse]
 
     class Config:

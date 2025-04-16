@@ -2,6 +2,7 @@ import { Toaster, toast } from "react-hot-toast";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
 const Login: React.FC = () => {
   const [rollNumber, setRollNumber] = useState("");
@@ -15,7 +16,7 @@ const Login: React.FC = () => {
       const isEmail = rollNumber.includes("@");
       if (isEmail) {
         const response = await axios.post(
-          "http://localhost:8000/api/faculty/login",
+          `${API_URL}/api/faculty/login`,
           {
             username: rollNumber,
             password: password,
@@ -31,7 +32,7 @@ const Login: React.FC = () => {
         navigate("/teacher/dashboard");
       } else {
         const response = await axios.post(
-          "http://localhost:8000/api/auth/token",
+          `${API_URL}/api/auth/token`,
           {
             username: rollNumber,
             password: password,
@@ -158,14 +159,10 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          <p className="mt-10 text-center text-sm/6 text-gray-500">
-            Not a member?{" "}
-            <a
-              href="#"
-              className="font-semibold text-indigo-600 hover:text-indigo-500"
-            >
-              Start a 14 day free trial
-            </a>
+          <p className="mt-10 text-left text-sm/6 text-gray-500">
+            Demo Credentials: <br />
+            Email: user@google.com <br />
+            Password: pass1234
           </p>
         </div>
       </div>

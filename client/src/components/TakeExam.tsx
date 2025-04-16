@@ -1,3 +1,4 @@
+import Webcam from "react-webcam";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api_client from "../api_client";
@@ -12,6 +13,7 @@ import {
   FormControlLabel,
   FormControl,
 } from "@mui/material";
+import WebCamPreviewComp from "./WebCamPreviewComp";
 
 interface Question {
   id: number;
@@ -127,7 +129,8 @@ const TakeExam: React.FC = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-50 pt-24">
+      <div className="min-h-screen bg-gray-50 relative pt-24">
+        <WebCamPreviewComp />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <div className="flex justify-between items-center mb-6">

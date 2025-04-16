@@ -35,14 +35,6 @@ export default function TeacherMainMenu() {
               <RiMenuSearchLine /> View Students
             </Link>
           </li>
-          <li>
-            <Link
-              to="#"
-              className="hover:bg-[#01013a] px-4 py-2 rounded-lg hover:text-white flex items-center gap-2 bg-white duration-200"
-            >
-              <RiPieChart2Line /> View Analytics
-            </Link>
-          </li>
         </ul>
       </div>
     </>

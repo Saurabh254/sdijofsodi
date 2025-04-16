@@ -10,6 +10,7 @@ import Analytics from "./components/Analytics";
 import ExamResults from "./components/ExamResults";
 import SubmissionDetails from "./components/SubmissionDetails";
 import { Toaster } from "react-hot-toast";
+import ExamSubmissionPage from "./pages/ExamSubmissionPage";
 
 // Lazy load components
 const Login = lazy(() => import("./pages/Login"));
@@ -21,7 +22,7 @@ const UserDashboard = lazy(() => import("./components/UserDashboard"));
 const TakeExam = lazy(() => import("./components/TakeExam"));
 const StudentsPage = lazy(() => import("./pages/StudentsPage"));
 const ThankYouPage = lazy(() => import("./pages/ThankYouPage"));
-const MyExams = lazy(() => import("./components/MyExams"));
+const MyExams = lazy(() => import("./pages/MyExams"));
 const Results = lazy(() => import("./components/Results"));
 const UpcomingExams = lazy(() => import("./components/UpcomingExams"));
 const AddStudentForm = lazy(() => import("./components/AddStudentForm"));
@@ -52,6 +53,10 @@ const App: React.FC = () => {
             <Route path="/teacher/results" element={<ExamResults />} />
             <Route path="/teacher/students/list" element={<StudentsPage />} />
             <Route path="/teacher/students/add" element={<AddStudentForm />} />
+            <Route
+              path="/teacher/exam/:examId/submissions"
+              element={<ExamSubmissionPage />}
+            />
             <Route
               path="/teacher/exam/:examId/submission/:submissionId"
               element={<SubmissionDetails />}
